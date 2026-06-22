@@ -461,13 +461,11 @@ function placeOrder(){
   btn.disabled = true;
 
   const orders = getOrders();
-  // Tạo mã đơn ngẫu nhiên tránh trùng lặp
   const orderId = '#BN' + Math.floor(10000 + Math.random() * 90000); 
   const orderTime = timestamp();
   const orderDate = new Date().toLocaleDateString('vi-VN');
   const totalAmount = cartTotal() + 20000;
   
-  // Chuyển mảng items thành chuỗi dễ đọc cho Google Sheet
   const itemsString = cart.map(i => `${i.name} (x${i.qty})`).join(', ');
 
   const newOrder = {
@@ -482,7 +480,6 @@ function placeOrder(){
     statusHistory: [{status:'pending', time: orderTime}]
   };
   
-  // Dữ liệu sẽ gửi lên Apps Script
   const dataToSheet = {
     id: orderId,
     khach_hang: name,
@@ -498,33 +495,25 @@ function placeOrder(){
 
   fetch(API_URL, {
     method: 'POST',
-    redirect: 'follow', // Bắt buộc cho Google Apps Script
-    headers: {
-      'Content-Type': 'text/plain;charset=utf-8'
-    },
+    // MẸO: Trình duyệt tự gửi text/plain khi truyền chuỗi JSON, không set Header thủ công để chống lỗi CORS
     body: JSON.stringify(dataToSheet)
   })
   .then(async res => {
-    // Nhận dữ liệu ở dạng text trước để bắt các lỗi HTML từ Google
     const text = await res.text();
-    try {
-      return JSON.parse(text);
-    } catch (e) {
-      console.error("Lỗi từ Google:", text);
-      throw new Error("Phản hồi không phải JSON");
+    if(text.includes("<html") || text.includes("<body")) {
+       console.error("Lỗi Google Apps Script:", text);
+       throw new Error("Lỗi bảo mật Google (Chưa set quyền Anyone)");
     }
+    return JSON.parse(text); // Phân tích JSON khi chắc chắn trả về đúng
   })
   .then(data => {
-    if(data.error) {
-       console.error("Lỗi từ code Apps Script:", data.error);
-       throw new Error(data.error);
-    }
+    if(data.error) throw new Error(data.error);
     
-    // Nếu API gọi thành công, lưu vào LocalStorage cho người dùng dễ theo dõi lại
+    // Lưu local
     orders.unshift(newOrder);
     saveOrders(orders);
     
-    // Reset giỏ hàng và form
+    // Reset
     cart = [];
     updateCartUI();
     document.getElementById('ckName').value='';
@@ -535,11 +524,11 @@ function placeOrder(){
     showToast('Đặt hàng thành công! 🎉','success');
     trackingOrderId = orderId;
     setPage('tracking');
-    startPolling(orderId); // Bắt đầu lắng nghe thay đổi
+    startPolling(orderId);
   })
   .catch(err => {
-    console.error('Lỗi chi tiết:', err);
-    showToast('Đã xảy ra lỗi, vui lòng thử lại sau!', 'error');
+    console.error('Lỗi khi lưu đơn:', err);
+    showToast(err.message === "Failed to fetch" ? "Lỗi mạng hoặc bị chặn CORS!" : err.message, 'error');
   })
   .finally(() => {
     btn.innerHTML = orgBtnText;
@@ -623,17 +612,13 @@ function startPolling(orderId){
     fetch(`${API_URL}?id=${encodeURIComponent(orderId)}`)
       .then(async res => {
         const text = await res.text();
-        try {
-          return JSON.parse(text);
-        } catch (e) {
-          return null; // Bỏ qua nếu có lỗi mạng HTML
-        }
+        if(text.includes("<html")) return null; 
+        return JSON.parse(text);
       })
       .then(data => {
         if (data && data.length > 0) {
-          const sheetOrder = data[0]; // Lấy kết quả đầu tiên trùng ID
+          const sheetOrder = data[0];
           
-          // Chuyển đổi trạng thái tiếng Việt (trên sheet) sang tiếng Anh (code)
           let statusKey = 'pending';
           if(sheetOrder.trang_thai === 'Đã xác nhận') statusKey = 'confirmed';
           else if(sheetOrder.trang_thai === 'Đang nấu') statusKey = 'cooking';
@@ -645,22 +630,18 @@ function startPolling(orderId){
           const orders = getOrders();
           const oIndex = orders.findIndex(x => x.id === orderId);
           
-          // Nếu trạng thái thay đổi so với local
           if (oIndex !== -1 && orders[oIndex].status !== statusKey) {
             orders[oIndex].status = statusKey;
             
-            // Lưu lại lịch sử cập nhật thời gian
             if(!orders[oIndex].statusHistory.find(h=>h.status===statusKey)) {
                orders[oIndex].statusHistory.push({status: statusKey, time: timestamp()});
             }
             saveOrders(orders);
 
-            // Render lại màn hình
             if(currentPage === 'tracking' && trackingOrderId === orderId){
               renderTracking();
             }
 
-            // Hiển thị thông báo
             if(statusKey === 'delivered'){
               showToast('🎉 Đơn hàng đã được giao thành công!','success');
               clearInterval(pollingInterval);
@@ -671,7 +652,7 @@ function startPolling(orderId){
         }
       })
       .catch(err => console.log("Đang chờ đồng bộ..."));
-  }, 5000); // Tự động load API kiểm tra trạng thái mỗi 5 giây
+  }, 5000);
 }
 
 // ====== MY ORDERS ======
