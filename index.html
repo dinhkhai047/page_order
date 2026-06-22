@@ -253,6 +253,9 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
 <div class="toast" id="toast"></div>
 
 <script>
+// ====== CONFIG ======
+const API_URL = 'https://script.google.com/macros/s/AKfycbzoezQ3ZFbdMvFIlG8pYI7UE9sU0USkzboC0X9oENxuHZBeU5KOCfzaMQ06-VyxP3Jq/exec';
+
 // ====== CONSTANTS ======
 const STORAGE_KEY = 'bepngon_orders';
 const PRODUCTS_KEY = 'bepngon_products';
@@ -442,7 +445,7 @@ function renderCheckoutSummary(){
   `;
 }
 
-// ====== PLACE ORDER (KẾT NỐI API) ======
+// ====== PLACE ORDER (KẾT NỐI API APP SCRIPT) ======
 function placeOrder(){
   const name = document.getElementById('ckName').value.trim();
   const phone = document.getElementById('ckPhone').value.trim();
@@ -478,27 +481,25 @@ function placeOrder(){
     statusHistory: [{status:'pending', time: orderTime}]
   };
   
-  // Dữ liệu sẽ gửi lên SheetDB
+  // Dữ liệu sẽ gửi lên Apps Script
   const dataToSheet = {
-    data: {
-      id: orderId,
-      khach_hang: name,
-      sdt: phone,
-      dia_chi: addr,
-      chi_tiet_mon: itemsString,
-      tong_tien: totalAmount,
-      ghi_chu: note,
-      thoi_gian: `${orderTime} ${orderDate}`,
-      trang_thai: 'Chờ xác nhận'
-    }
+    id: orderId,
+    khach_hang: name,
+    sdt: phone,
+    dia_chi: addr,
+    chi_tiet_mon: itemsString,
+    tong_tien: totalAmount,
+    ghi_chu: note,
+    thoi_gian: `${orderTime} ${orderDate}`,
+    trang_thai: 'Chờ xác nhận',
+    shipper: ''
   };
 
-  // --- THAY ĐỔI LINK CỦA BẠN VÀO ĐÂY ---
-  fetch('https://sheetdb.io/api/v1/93k3mwsdbcu6b', {
+  fetch(API_URL, {
     method: 'POST',
+    // Đổi header thành text/plain để không bị Google Apps Script chặn CORS
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'text/plain;charset=utf-8'
     },
     body: JSON.stringify(dataToSheet)
   })
@@ -604,8 +605,7 @@ function startPolling(orderId){
   if(pollingInterval) clearInterval(pollingInterval);
   
   pollingInterval = setInterval(() => {
-    // --- THAY ĐỔI LINK CỦA BẠN VÀO ĐÂY (thêm /search?id=) ---
-    fetch(`DÁN_LINK_API_CỦA_BẠN_VÀO_ĐÂY/search?id=${orderId}`)
+    fetch(`${API_URL}?id=${encodeURIComponent(orderId)}`)
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {
@@ -648,7 +648,7 @@ function startPolling(orderId){
           }
         }
       })
-      .catch(err => console.log("Lỗi đồng bộ:", err));
+      .catch(err => console.log("Đang chờ đồng bộ...", err));
   }, 5000); // Tự động load API kiểm tra trạng thái mỗi 5 giây
 }
 
