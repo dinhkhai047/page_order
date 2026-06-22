@@ -105,6 +105,7 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
 .checkout-total-row span:last-child{color:var(--orange)}
 .btn-place{width:100%;background:var(--orange);color:#fff;border:none;padding:16px;border-radius:var(--radius);font-family:inherit;font-size:17px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:8px}
 .btn-place:hover{background:var(--orange-dark)}
+.btn-place:disabled{background:var(--gray);cursor:not-allowed}
 .btn-back{background:none;border:1.5px solid var(--gray-border);padding:12px 20px;border-radius:var(--radius);font-family:inherit;font-size:15px;cursor:pointer;color:var(--text-muted);margin-bottom:16px;font-weight:500}
 
 /* TRACKING */
@@ -185,7 +186,6 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
   </button>
 </nav>
 
-<!-- SHOP -->
 <div class="page active" id="page-shop">
   <div class="shop-hero">
     <h1>Đồ ăn ngon, <span>giao tận nơi</span> 🚀</h1>
@@ -201,7 +201,6 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
   </div>
 </div>
 
-<!-- CHECKOUT -->
 <div class="page" id="page-checkout">
   <div class="checkout-wrap">
     <button class="btn-back" onclick="setPage('shop')">← Quay lại</button>
@@ -212,12 +211,11 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
       <div class="form-group"><label>Số điện thoại</label><input type="tel" id="ckPhone" placeholder="0901 234 567"></div>
       <div class="form-group"><label>Địa chỉ giao hàng</label><input type="text" id="ckAddr" placeholder="123 Đường ABC, Quận 1, TP.HCM"></div>
       <div class="form-group"><label>Ghi chú (không bắt buộc)</label><textarea id="ckNote" placeholder="VD: Ít cay, không hành..."></textarea></div>
-      <button class="btn-place" onclick="placeOrder()">🎉 Đặt hàng ngay</button>
+      <button class="btn-place" id="btnPlace" onclick="placeOrder()">🎉 Đặt hàng ngay</button>
     </div>
   </div>
 </div>
 
-<!-- TRACKING -->
 <div class="page" id="page-tracking">
   <div class="tracking-wrap">
     <div class="tracking-card">
@@ -238,7 +236,6 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
   </div>
 </div>
 
-<!-- MY ORDERS -->
 <div class="page" id="page-myorders">
   <div class="orders-wrap">
     <h2>📦 Đơn hàng của tôi</h2>
@@ -246,7 +243,6 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
   </div>
 </div>
 
-<!-- CART -->
 <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
 <div class="cart-panel" id="cartPanel">
   <div class="cart-header"><h3>🛒 Giỏ hàng</h3><button class="cart-close" onclick="toggleCart()">✕</button></div>
@@ -280,17 +276,17 @@ const TRACKING_STEPS = [
 ];
 
 const DEFAULT_PRODUCTS = [
-  {id:1, name:'Phở Bò Tái',         desc:'Phở Nam bộ truyền thống, nước dùng 8 tiếng',    price:65000, emoji:'🍜', cat:'Phở & Bún',    badge:'Bán chạy'},
-  {id:2, name:'Bún Bò Huế',         desc:'Cay nồng đặc trưng, thịt bò mềm',               price:55000, emoji:'🍲', cat:'Phở & Bún',    badge:''},
-  {id:3, name:'Cơm Tấm Sườn',       desc:'Sườn nướng than hoa, cơm tấm dẻo thơm',         price:70000, emoji:'🍚', cat:'Cơm',          badge:'Bán chạy'},
-  {id:4, name:'Cơm Gà Hội An',      desc:'Gà ta luộc, cơm nấu nước dùng gà',              price:75000, emoji:'🍗', cat:'Cơm',          badge:''},
-  {id:5, name:'Bánh Mì Thịt Nướng', desc:'Bánh mì nóng giòn, thịt nướng mật ong',         price:35000, emoji:'🥖', cat:'Bánh mì',      badge:'Mới'},
-  {id:6, name:'Hủ Tiếu Nam Vang',   desc:'Hủ tiếu dai, thịt băm, tôm tươi',               price:60000, emoji:'🍝', cat:'Phở & Bún',    badge:''},
-  {id:7, name:'Bò Lúc Lắc',         desc:'Bò Mỹ thăn lưng, xào hành tây',                 price:120000,emoji:'🥩', cat:'Món xào',      badge:'Premium'},
+  {id:1, name:'Phở Bò Tái',         desc:'Phở Nam bộ truyền thống, nước dùng 8 tiếng',     price:65000, emoji:'🍜', cat:'Phở & Bún',    badge:'Bán chạy'},
+  {id:2, name:'Bún Bò Huế',         desc:'Cay nồng đặc trưng, thịt bò mềm',                price:55000, emoji:'🍲', cat:'Phở & Bún',    badge:''},
+  {id:3, name:'Cơm Tấm Sườn',       desc:'Sườn nướng than hoa, cơm tấm dẻo thơm',          price:70000, emoji:'🍚', cat:'Cơm',          badge:'Bán chạy'},
+  {id:4, name:'Cơm Gà Hội An',      desc:'Gà ta luộc, cơm nấu nước dùng gà',               price:75000, emoji:'🍗', cat:'Cơm',          badge:''},
+  {id:5, name:'Bánh Mì Thịt Nướng', desc:'Bánh mì nóng giòn, thịt nướng mật ong',          price:35000, emoji:'🥖', cat:'Bánh mì',      badge:'Mới'},
+  {id:6, name:'Hủ Tiếu Nam Vang',   desc:'Hủ tiếu dai, thịt băm, tôm tươi',                price:60000, emoji:'🍝', cat:'Phở & Bún',    badge:''},
+  {id:7, name:'Bò Lúc Lắc',         desc:'Bò Mỹ thăn lưng, xào hành tây',                  price:120000,emoji:'🥩', cat:'Món xào',      badge:'Premium'},
   {id:8, name:'Trà Sữa Trân Châu',  desc:'Trà sữa Đài Loan, trân châu đường đen',          price:45000, emoji:'🧋', cat:'Đồ uống',      badge:''},
   {id:9, name:'Nước Mía Sầu Riêng', desc:'Nước mía tươi kết hợp sầu riêng nguyên chất',   price:35000, emoji:'🥤', cat:'Đồ uống',      badge:''},
   {id:10,name:'Gỏi Cuốn Tôm Thịt', desc:'Gỏi cuốn tươi, tôm sú, thịt luộc, rau thơm',   price:50000, emoji:'🌯', cat:'Khai vị',      badge:''},
-  {id:11,name:'Chả Giò Rế',         desc:'Chả giò giòn rụm, nhân thịt cua',               price:55000, emoji:'🥟', cat:'Khai vị',      badge:'Bán chạy'},
+  {id:11,name:'Chả Giò Rế',         desc:'Chả giò giòn rụm, nhân thịt cua',                price:55000, emoji:'🥟', cat:'Khai vị',      badge:'Bán chạy'},
   {id:12,name:'Chè Đậu Xanh',       desc:'Chè đậu xanh nấu cốt dừa, ăn nóng hoặc lạnh',  price:25000, emoji:'🍧', cat:'Tráng miệng',  badge:''},
 ];
 
@@ -446,46 +442,93 @@ function renderCheckoutSummary(){
   `;
 }
 
-// ====== PLACE ORDER ======
+// ====== PLACE ORDER (KẾT NỐI API) ======
 function placeOrder(){
   const name = document.getElementById('ckName').value.trim();
   const phone = document.getElementById('ckPhone').value.trim();
   const addr = document.getElementById('ckAddr').value.trim();
+  const note = document.getElementById('ckNote').value.trim();
   if(!name||!phone||!addr){ showToast('Vui lòng điền đầy đủ thông tin!'); return; }
   
+  // Nút loading
+  const btn = document.getElementById('btnPlace');
+  const orgBtnText = btn.innerHTML;
+  btn.innerHTML = '⏳ Đang xử lý...';
+  btn.disabled = true;
+
   const orders = getOrders();
-  const newId = orders.length > 0 ? Math.max(...orders.map(o=>parseInt(o.id.replace('#BN','')))) + 1 : 1;
-  const orderId = '#BN' + String(newId).padStart(3,'0');
+  // Tạo mã đơn ngẫu nhiên tránh trùng lặp
+  const orderId = '#BN' + Math.floor(10000 + Math.random() * 90000); 
+  const orderTime = timestamp();
+  const orderDate = new Date().toLocaleDateString('vi-VN');
+  const totalAmount = cartTotal() + 20000;
   
+  // Chuyển mảng items thành chuỗi dễ đọc cho Google Sheet
+  const itemsString = cart.map(i => `${i.name} (x${i.qty})`).join(', ');
+
   const newOrder = {
     id: orderId,
     customer: name, phone, address: addr,
-    note: document.getElementById('ckNote').value.trim(),
+    note: note,
     items: cart.map(i=>({...i})),
     status: 'pending',
-    time: timestamp(),
-    date: new Date().toLocaleDateString('vi-VN'),
+    time: orderTime,
+    date: orderDate,
     shipper: '',
-    statusHistory: [{status:'pending', time: timestamp()}]
+    statusHistory: [{status:'pending', time: orderTime}]
   };
   
-  orders.unshift(newOrder);
-  saveOrders(orders);
-  
-  // Trigger storage event for admin page
-  localStorage.setItem('bepngon_new_order', JSON.stringify({id: orderId, time: Date.now()}));
-  
-  cart = [];
-  updateCartUI();
-  document.getElementById('ckName').value='';
-  document.getElementById('ckPhone').value='';
-  document.getElementById('ckAddr').value='';
-  document.getElementById('ckNote').value='';
-  
-  showToast('Đặt hàng thành công! 🎉','success');
-  trackingOrderId = orderId;
-  setPage('tracking');
-  startPolling(orderId);
+  // Dữ liệu sẽ gửi lên SheetDB
+  const dataToSheet = {
+    data: {
+      id: orderId,
+      khach_hang: name,
+      sdt: phone,
+      dia_chi: addr,
+      chi_tiet_mon: itemsString,
+      tong_tien: totalAmount,
+      ghi_chu: note,
+      thoi_gian: `${orderTime} ${orderDate}`,
+      trang_thai: 'Chờ xác nhận'
+    }
+  };
+
+  // --- THAY ĐỔI LINK CỦA BẠN VÀO ĐÂY ---
+  fetch('https://sheetdb.io/api/v1/93k3mwsdbcu6b', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(dataToSheet)
+  })
+  .then(res => res.json())
+  .then(data => {
+    // Nếu API gọi thành công, lưu vào LocalStorage cho người dùng dễ theo dõi lại
+    orders.unshift(newOrder);
+    saveOrders(orders);
+    
+    // Reset giỏ hàng và form
+    cart = [];
+    updateCartUI();
+    document.getElementById('ckName').value='';
+    document.getElementById('ckPhone').value='';
+    document.getElementById('ckAddr').value='';
+    document.getElementById('ckNote').value='';
+    
+    showToast('Đặt hàng thành công! 🎉','success');
+    trackingOrderId = orderId;
+    setPage('tracking');
+    startPolling(orderId); // Bắt đầu lắng nghe thay đổi
+  })
+  .catch(err => {
+    console.error('Lỗi khi lưu đơn lên Sheet:', err);
+    showToast('Đã xảy ra lỗi, vui lòng thử lại sau!', 'error');
+  })
+  .finally(() => {
+    btn.innerHTML = orgBtnText;
+    btn.disabled = false;
+  });
 }
 
 // ====== TRACKING ======
@@ -556,28 +599,57 @@ function renderTrackItemsSummary(o){
   `;
 }
 
-// ====== POLLING (live sync from admin) ======
+// ====== POLLING (ĐỒNG BỘ TRẠNG THÁI TỪ GOOGLE SHEET) ======
 function startPolling(orderId){
   if(pollingInterval) clearInterval(pollingInterval);
-  let lastStatus = '';
-  pollingInterval = setInterval(()=>{
-    const orders = getOrders();
-    const o = orders.find(x=>x.id===orderId);
-    if(!o) return;
-    if(o.status !== lastStatus){
-      lastStatus = o.status;
-      if(currentPage==='tracking' && trackingOrderId===orderId){
-        renderTracking();
-      }
-      if(o.status==='delivered'){
-        showToast('🎉 Đơn hàng đã được giao thành công!','success');
-        clearInterval(pollingInterval);
-      }
-      if(['shipper','delivering'].includes(o.status)){
-        showToast(`${STATUSES[o.status].icon} ${STATUSES[o.status].label}`);
-      }
-    }
-  }, 2000);
+  
+  pollingInterval = setInterval(() => {
+    // --- THAY ĐỔI LINK CỦA BẠN VÀO ĐÂY (thêm /search?id=) ---
+    fetch(`DÁN_LINK_API_CỦA_BẠN_VÀO_ĐÂY/search?id=${orderId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          const sheetOrder = data[0]; // Lấy kết quả đầu tiên trùng ID
+          
+          // Chuyển đổi trạng thái tiếng Việt (trên sheet) sang tiếng Anh (code)
+          let statusKey = 'pending';
+          if(sheetOrder.trang_thai === 'Đã xác nhận') statusKey = 'confirmed';
+          else if(sheetOrder.trang_thai === 'Đang nấu') statusKey = 'cooking';
+          else if(sheetOrder.trang_thai === 'Shipper đã nhận') statusKey = 'shipper';
+          else if(sheetOrder.trang_thai === 'Đang giao hàng') statusKey = 'delivering';
+          else if(sheetOrder.trang_thai === 'Đã giao') statusKey = 'delivered';
+          else if(sheetOrder.trang_thai === 'Đã huỷ') statusKey = 'cancelled';
+
+          const orders = getOrders();
+          const oIndex = orders.findIndex(x => x.id === orderId);
+          
+          // Nếu trạng thái thay đổi so với local
+          if (oIndex !== -1 && orders[oIndex].status !== statusKey) {
+            orders[oIndex].status = statusKey;
+            
+            // Lưu lại lịch sử cập nhật thời gian
+            if(!orders[oIndex].statusHistory.find(h=>h.status===statusKey)) {
+               orders[oIndex].statusHistory.push({status: statusKey, time: timestamp()});
+            }
+            saveOrders(orders);
+
+            // Render lại màn hình
+            if(currentPage === 'tracking' && trackingOrderId === orderId){
+              renderTracking();
+            }
+
+            // Hiển thị thông báo
+            if(statusKey === 'delivered'){
+              showToast('🎉 Đơn hàng đã được giao thành công!','success');
+              clearInterval(pollingInterval);
+            } else if(['shipper','delivering'].includes(statusKey)){
+              showToast(`${STATUSES[statusKey].icon} ${STATUSES[statusKey].label}`);
+            }
+          }
+        }
+      })
+      .catch(err => console.log("Lỗi đồng bộ:", err));
+  }, 5000); // Tự động load API kiểm tra trạng thái mỗi 5 giây
 }
 
 // ====== MY ORDERS ======
@@ -588,7 +660,7 @@ function renderMyOrders(){
     return;
   }
   document.getElementById('myOrdersList').innerHTML = orders.map(o=>{
-    const s = STATUSES[o.status];
+    const s = STATUSES[o.status] || STATUSES['pending'];
     const total = o.items.reduce((sum,i)=>sum+i.price*i.qty, 0) + 20000;
     const names = o.items.map(i=>`${i.emoji} ${i.name}`).join(', ');
     return `<div class="order-row" onclick="viewOrder('${o.id}')">
@@ -610,16 +682,6 @@ function viewOrder(id){
   startPolling(id);
   setPage('tracking');
 }
-
-// Listen for storage changes from admin (cross-tab)
-window.addEventListener('storage', (e)=>{
-  if(e.key === STORAGE_KEY){
-    if(currentPage==='tracking' && trackingOrderId){
-      renderTracking();
-    }
-    if(currentPage==='myorders') renderMyOrders();
-  }
-});
 
 // ====== INIT ======
 renderShop();
