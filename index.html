@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BếpNgon 🍜 — Đặt đồ ăn online</title>
+<title>Lụa Boutique 👗 — Thời trang Nam Nữ</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -177,9 +177,9 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
 <body>
 
 <nav>
-  <div class="nav-brand">Bếp<span>Ngon</span> 🍜</div>
+  <div class="nav-brand">Lụa<span>Boutique</span> 👗</div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="setPage('shop')">🛍️ Đặt hàng</button>
+    <button class="nav-tab active" onclick="setPage('shop')">🛍️ Mua sắm</button>
     <button class="nav-tab" onclick="setPage('myorders')">📦 Đơn của tôi</button>
   </div>
   <button class="nav-cart" onclick="toggleCart()">
@@ -189,10 +189,10 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
 
 <div class="page active" id="page-shop">
   <div class="shop-hero">
-    <h1>Đồ ăn ngon, <span>giao tận nơi</span> 🚀</h1>
-    <p>Hơn 50 món ăn từ các bếp gia truyền TPHCM</p>
+    <h1>Phong cách thời thượng, <span>giao tận tay</span> 🚀</h1>
+    <p>Hơn 50+ mẫu thiết kế mới nhất dành cho Nam và Nữ</p>
     <div class="shop-search">
-      <input type="text" placeholder="Tìm món ăn..." id="searchInput" oninput="filterProducts()">
+      <input type="text" placeholder="Tìm kiếm sản phẩm..." id="searchInput" oninput="filterProducts()">
       <button onclick="filterProducts()">Tìm</button>
     </div>
   </div>
@@ -211,7 +211,7 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
       <div class="form-group"><label>Họ tên</label><input type="text" id="ckName" placeholder="Nguyễn Văn A"></div>
       <div class="form-group"><label>Số điện thoại</label><input type="tel" id="ckPhone" placeholder="0901 234 567"></div>
       <div class="form-group"><label>Địa chỉ giao hàng</label><input type="text" id="ckAddr" placeholder="123 Đường ABC, Quận 1, TP.HCM"></div>
-      <div class="form-group"><label>Ghi chú (không bắt buộc)</label><textarea id="ckNote" placeholder="VD: Ít cay, không hành..."></textarea></div>
+      <div class="form-group"><label>Ghi chú (không bắt buộc)</label><textarea id="ckNote" placeholder="VD: Giao giờ hành chính, gọi trước khi giao..."></textarea></div>
       <button class="btn-place" id="btnPlace" onclick="placeOrder()">🎉 Đặt hàng ngay</button>
     </div>
   </div>
@@ -258,40 +258,40 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
 const API_URL = 'https://script.google.com/macros/s/AKfycbzoezQ3ZFbdMvFIlG8pYI7UE9sU0USkzboC0X9oENxuHZBeU5KOCfzaMQ06-VyxP3Jq/exec';
 
 // ====== CONSTANTS ======
-const STORAGE_KEY = 'bepngon_orders';
-const PRODUCTS_KEY = 'bepngon_products';
+const STORAGE_KEY = 'lua_boutique_orders';
+const PRODUCTS_KEY = 'lua_boutique_products';
 const STATUSES = {
   pending:    {label:'Chờ xác nhận',    cls:'s-pending',    icon:'⏳'},
   confirmed:  {label:'Đã xác nhận',     cls:'s-cooking',    icon:'✅'},
-  cooking:    {label:'Đang nấu',         cls:'s-cooking',    icon:'👨‍🍳'},
+  cooking:    {label:'Đang đóng gói',   cls:'s-cooking',    icon:'📦'},
   shipper:    {label:'Shipper đã nhận',  cls:'s-delivering', icon:'🚴'},
-  delivering: {label:'Đang giao hàng',   cls:'s-delivering', icon:'📦'},
+  delivering: {label:'Đang giao hàng',   cls:'s-delivering', icon:'🏍️'},
   delivered:  {label:'Đã giao',          cls:'s-delivered',  icon:'🎉'},
   cancelled:  {label:'Đã huỷ',           cls:'s-cancelled',  icon:'❌'}
 };
 const STATUS_ORDER = ['pending','confirmed','cooking','shipper','delivering','delivered'];
 const TRACKING_STEPS = [
   {key:'pending',    title:'Đơn hàng đã đặt',        desc:'Chúng tôi đã nhận được đơn hàng của bạn',      icon:'📝'},
-  {key:'confirmed',  title:'Đơn đã được xác nhận',   desc:'Nhà bếp đã xác nhận và chuẩn bị nguyên liệu',  icon:'✅'},
-  {key:'cooking',    title:'Đang nấu',                desc:'Đầu bếp đang chế biến món ăn của bạn',          icon:'👨‍🍳'},
+  {key:'confirmed',  title:'Đơn đã được xác nhận',   desc:'Shop đã xác nhận và chuẩn bị soạn hàng',       icon:'✅'},
+  {key:'cooking',    title:'Đang đóng gói',           desc:'Nhân viên đang đóng gói đơn hàng của bạn',     icon:'📦'},
   {key:'shipper',    title:'Shipper đã nhận đơn',     desc:'Shipper đã lấy hàng và sắp xuất phát',          icon:'🚴'},
   {key:'delivering', title:'Đang trên đường tới bạn', desc:'Shipper đang giao hàng đến địa chỉ của bạn',   icon:'🏍️'},
-  {key:'delivered',  title:'Đã giao thành công! 🎉', desc:'Cảm ơn bạn đã tin dùng BếpNgon!',              icon:'🎉'},
+  {key:'delivered',  title:'Đã giao thành công! 🎉', desc:'Cảm ơn bạn đã mua sắm tại Lụa Boutique!',      icon:'🎉'},
 ];
 
 const DEFAULT_PRODUCTS = [
-  {id:1, name:'Phở Bò Tái',         desc:'Phở Nam bộ truyền thống, nước dùng 8 tiếng',     price:65000, emoji:'🍜', cat:'Phở & Bún',    badge:'Bán chạy'},
-  {id:2, name:'Bún Bò Huế',         desc:'Cay nồng đặc trưng, thịt bò mềm',                price:55000, emoji:'🍲', cat:'Phở & Bún',    badge:''},
-  {id:3, name:'Cơm Tấm Sườn',       desc:'Sườn nướng than hoa, cơm tấm dẻo thơm',          price:70000, emoji:'🍚', cat:'Cơm',          badge:'Bán chạy'},
-  {id:4, name:'Cơm Gà Hội An',      desc:'Gà ta luộc, cơm nấu nước dùng gà',               price:75000, emoji:'🍗', cat:'Cơm',          badge:''},
-  {id:5, name:'Bánh Mì Thịt Nướng', desc:'Bánh mì nóng giòn, thịt nướng mật ong',          price:35000, emoji:'🥖', cat:'Bánh mì',      badge:'Mới'},
-  {id:6, name:'Hủ Tiếu Nam Vang',   desc:'Hủ tiếu dai, thịt băm, tôm tươi',                price:60000, emoji:'🍝', cat:'Phở & Bún',    badge:''},
-  {id:7, name:'Bò Lúc Lắc',         desc:'Bò Mỹ thăn lưng, xào hành tây',                  price:120000,emoji:'🥩', cat:'Món xào',      badge:'Premium'},
-  {id:8, name:'Trà Sữa Trân Châu',  desc:'Trà sữa Đài Loan, trân châu đường đen',          price:45000, emoji:'🧋', cat:'Đồ uống',      badge:''},
-  {id:9, name:'Nước Mía Sầu Riêng', desc:'Nước mía tươi kết hợp sầu riêng nguyên chất',   price:35000, emoji:'🥤', cat:'Đồ uống',      badge:''},
-  {id:10,name:'Gỏi Cuốn Tôm Thịt', desc:'Gỏi cuốn tươi, tôm sú, thịt luộc, rau thơm',   price:50000, emoji:'🌯', cat:'Khai vị',      badge:''},
-  {id:11,name:'Chả Giò Rế',         desc:'Chả giò giòn rụm, nhân thịt cua',                price:55000, emoji:'🥟', cat:'Khai vị',      badge:'Bán chạy'},
-  {id:12,name:'Chè Đậu Xanh',       desc:'Chè đậu xanh nấu cốt dừa, ăn nóng hoặc lạnh',  price:25000, emoji:'🍧', cat:'Tráng miệng',  badge:''},
+  {id:1, name:'Áo Thun Nam Basic',      desc:'Cotton 100%, form rộng thoải mái',             price:150000, emoji:'👕', cat:'Áo Nam',       badge:'Bán chạy'},
+  {id:2, name:'Sơ Mi Nam Cổ Tàu',       desc:'Vải đũi lụa mềm mát, chống nhăn',              price:220000, emoji:'👔', cat:'Áo Nam',       badge:''},
+  {id:3, name:'Quần Jean Nam Suông',    desc:'Jean xanh nhạt, phong cách Hàn Quốc',          price:350000, emoji:'👖', cat:'Quần Nam',     badge:'Mới'},
+  {id:4, name:'Áo Polo Nam',            desc:'Chất cá sấu thoáng khí, tôn dáng',             price:180000, emoji:'👕', cat:'Áo Nam',       badge:''},
+  {id:5, name:'Áo Kiểu Nữ Cổ V',        desc:'Voan lụa 2 lớp mịn màng',                      price:190000, emoji:'👚', cat:'Áo Nữ',        badge:'Hot'},
+  {id:6, name:'Đầm Xòe Hoa Nhí',        desc:'Đầm vintage đi biển, dạo phố',                 price:280000, emoji:'👗', cat:'Váy/Đầm Nữ',   badge:'Bán chạy'},
+  {id:7, name:'Chân Váy Chữ A',         desc:'Tôn dáng, kèm quần bảo hộ bên trong',          price:160000, emoji:'🥻', cat:'Váy/Đầm Nữ',   badge:''},
+  {id:8, name:'Quần Tây Ống Rộng Nữ',   desc:'Lưng cao hack dáng, vải tuyết mưa',            price:250000, emoji:'👖', cat:'Quần Nữ',      badge:'Premium'},
+  {id:9, name:'Áo Khoác Blazer Nữ',     desc:'Sang trọng, phù hợp môi trường công sở',       price:450000, emoji:'🧥', cat:'Áo Nữ',        badge:''},
+  {id:10,name:'Giày Sneaker Unisex',    desc:'Form dáng cực chuẩn, phối được nhiều đồ',      price:390000, emoji:'👟', cat:'Phụ kiện',     badge:'Mới'},
+  {id:11,name:'Túi Xách Nữ Mini',       desc:'Da PU cao cấp, kèm dây đeo chéo',              price:210000, emoji:'👜', cat:'Phụ kiện',     badge:'Bán chạy'},
+  {id:12,name:'Mũ Lưỡi Trai Nỉ',        desc:'Thiết kế đơn giản, phong cách năng động',      price:85000,  emoji:'🧢', cat:'Phụ kiện',     badge:''},
 ];
 
 // ====== STATE ======
@@ -400,7 +400,7 @@ function renderCartPanel(){
   const ci = document.getElementById('cartItems');
   const cf = document.getElementById('cartFooter');
   if(cart.length===0){
-    ci.innerHTML = `<div class="cart-empty"><div class="icon">🛒</div><p>Giỏ hàng trống</p><p style="font-size:13px;color:var(--text-muted)">Thêm món ngon nhé!</p></div>`;
+    ci.innerHTML = `<div class="cart-empty"><div class="icon">🛍️</div><p>Giỏ hàng trống</p><p style="font-size:13px;color:var(--text-muted)">Thêm vài món đồ phong cách nhé!</p></div>`;
     cf.innerHTML = ''; return;
   }
   ci.innerHTML = cart.map(item=>`
@@ -454,14 +454,13 @@ function placeOrder(){
   const note = document.getElementById('ckNote').value.trim();
   if(!name||!phone||!addr){ showToast('Vui lòng điền đầy đủ thông tin!'); return; }
   
-  // Nút loading
   const btn = document.getElementById('btnPlace');
   const orgBtnText = btn.innerHTML;
   btn.innerHTML = '⏳ Đang xử lý...';
   btn.disabled = true;
 
   const orders = getOrders();
-  const orderId = '#BN' + Math.floor(10000 + Math.random() * 90000); 
+  const orderId = '#LU' + Math.floor(10000 + Math.random() * 90000); 
   const orderTime = timestamp();
   const orderDate = new Date().toLocaleDateString('vi-VN');
   const totalAmount = cartTotal() + 20000;
@@ -485,7 +484,7 @@ function placeOrder(){
     khach_hang: name,
     sdt: phone,
     dia_chi: addr,
-    chi_tiet_mon: itemsString,
+    chi_tiet_mon: itemsString, // Mình vẫn giữ tên biến này để trùng khớp với backend Google Sheet của bạn
     tong_tien: totalAmount,
     ghi_chu: note,
     thoi_gian: `${orderTime} ${orderDate}`,
@@ -495,7 +494,10 @@ function placeOrder(){
 
   fetch(API_URL, {
     method: 'POST',
-    // MẸO: Trình duyệt tự gửi text/plain khi truyền chuỗi JSON, không set Header thủ công để chống lỗi CORS
+    redirect: 'follow', 
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
     body: JSON.stringify(dataToSheet)
   })
   .then(async res => {
@@ -504,7 +506,7 @@ function placeOrder(){
        console.error("Lỗi Google Apps Script:", text);
        throw new Error("Lỗi bảo mật Google (Chưa set quyền Anyone)");
     }
-    return JSON.parse(text); // Phân tích JSON khi chắc chắn trả về đúng
+    return JSON.parse(text); 
   })
   .then(data => {
     if(data.error) throw new Error(data.error);
@@ -550,12 +552,12 @@ function renderTracking(){
 }
 
 function renderETA(o){
-  const etaMap={pending:'~35 phút',confirmed:'~28 phút',cooking:'~20 phút',shipper:'~15 phút',delivering:'~5 phút',delivered:'Đã giao thành công!'};
+  const etaMap={pending:'~1-2 ngày',confirmed:'~1 ngày',cooking:'~12 giờ',shipper:'~2 giờ',delivering:'~30 phút',delivered:'Đã giao thành công!'};
   document.getElementById('trackingEta').innerHTML = `
     <div class="eta-icon">${o.status==='delivered'?'🎉':'🚀'}</div>
     <div>
       <div class="eta-label">Thời gian dự kiến</div>
-      <div class="eta-time">${etaMap[o.status]||'~30 phút'}</div>
+      <div class="eta-time">${etaMap[o.status]||'~1-2 ngày'}</div>
     </div>
     ${o.status!=='delivered'?`<div style="margin-left:auto;font-size:12px;color:var(--green);font-weight:600">● Đang cập nhật live</div>`:''}
   `;
@@ -595,7 +597,7 @@ function renderTrackingSteps(o){
 function renderTrackItemsSummary(o){
   const total = o.items.reduce((s,i)=>s+i.price*i.qty, 0);
   document.getElementById('trackItemsSummary').innerHTML = `
-    <h4>Món đã đặt</h4>
+    <h4>Sản phẩm đã đặt</h4>
     ${o.items.map(i=>`<div class="order-item-chip"><span class="oi-emoji">${i.emoji}</span><span class="oi-name">${i.name} × ${i.qty}</span><span class="oi-price">${fmt(i.price*i.qty)}</span></div>`).join('')}
     <div style="border-top:1px solid var(--gray-border);margin-top:12px;padding-top:12px;display:flex;justify-content:space-between;font-weight:700">
       <span>Tổng cộng</span><span style="color:var(--orange)">${fmt(total+20000)}</span>
@@ -617,11 +619,11 @@ function startPolling(orderId){
       })
       .then(data => {
         if (data && data.length > 0) {
-          const sheetOrder = data[0];
+          const sheetOrder = data[0]; 
           
           let statusKey = 'pending';
           if(sheetOrder.trang_thai === 'Đã xác nhận') statusKey = 'confirmed';
-          else if(sheetOrder.trang_thai === 'Đang nấu') statusKey = 'cooking';
+          else if(sheetOrder.trang_thai === 'Đang nấu' || sheetOrder.trang_thai === 'Đang đóng gói') statusKey = 'cooking';
           else if(sheetOrder.trang_thai === 'Shipper đã nhận') statusKey = 'shipper';
           else if(sheetOrder.trang_thai === 'Đang giao hàng') statusKey = 'delivering';
           else if(sheetOrder.trang_thai === 'Đã giao') statusKey = 'delivered';
@@ -652,14 +654,14 @@ function startPolling(orderId){
         }
       })
       .catch(err => console.log("Đang chờ đồng bộ..."));
-  }, 5000);
+  }, 5000); 
 }
 
 // ====== MY ORDERS ======
 function renderMyOrders(){
   const orders = getOrders();
   if(orders.length===0){
-    document.getElementById('myOrdersList').innerHTML = `<div style="text-align:center;padding:80px 0;color:var(--text-muted)"><div style="font-size:48px;margin-bottom:16px">📦</div><p style="font-size:18px;font-weight:600">Chưa có đơn hàng nào</p><p style="margin-top:8px">Hãy đặt món ngon đầu tiên!</p></div>`;
+    document.getElementById('myOrdersList').innerHTML = `<div style="text-align:center;padding:80px 0;color:var(--text-muted)"><div style="font-size:48px;margin-bottom:16px">📦</div><p style="font-size:18px;font-weight:600">Chưa có đơn hàng nào</p><p style="margin-top:8px">Hãy đặt món đồ đầu tiên!</p></div>`;
     return;
   }
   document.getElementById('myOrdersList').innerHTML = orders.map(o=>{
