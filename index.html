@@ -161,6 +161,7 @@ nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;justif
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--navy);color:#fff;padding:12px 24px;border-radius:50px;font-size:14px;font-weight:600;z-index:500;transition:transform .3s;pointer-events:none;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
 
 /* NOTIFICATION BELL */
 .notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:6px;display:none}
@@ -497,14 +498,28 @@ function placeOrder(){
 
   fetch(API_URL, {
     method: 'POST',
-    // Đổi header thành text/plain để không bị Google Apps Script chặn CORS
+    redirect: 'follow', // Bắt buộc cho Google Apps Script
     headers: {
       'Content-Type': 'text/plain;charset=utf-8'
     },
     body: JSON.stringify(dataToSheet)
   })
-  .then(res => res.json())
+  .then(async res => {
+    // Nhận dữ liệu ở dạng text trước để bắt các lỗi HTML từ Google
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error("Lỗi từ Google:", text);
+      throw new Error("Phản hồi không phải JSON");
+    }
+  })
   .then(data => {
+    if(data.error) {
+       console.error("Lỗi từ code Apps Script:", data.error);
+       throw new Error(data.error);
+    }
+    
     // Nếu API gọi thành công, lưu vào LocalStorage cho người dùng dễ theo dõi lại
     orders.unshift(newOrder);
     saveOrders(orders);
@@ -523,7 +538,7 @@ function placeOrder(){
     startPolling(orderId); // Bắt đầu lắng nghe thay đổi
   })
   .catch(err => {
-    console.error('Lỗi khi lưu đơn lên Sheet:', err);
+    console.error('Lỗi chi tiết:', err);
     showToast('Đã xảy ra lỗi, vui lòng thử lại sau!', 'error');
   })
   .finally(() => {
@@ -606,7 +621,14 @@ function startPolling(orderId){
   
   pollingInterval = setInterval(() => {
     fetch(`${API_URL}?id=${encodeURIComponent(orderId)}`)
-      .then(res => res.json())
+      .then(async res => {
+        const text = await res.text();
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          return null; // Bỏ qua nếu có lỗi mạng HTML
+        }
+      })
       .then(data => {
         if (data && data.length > 0) {
           const sheetOrder = data[0]; // Lấy kết quả đầu tiên trùng ID
@@ -648,7 +670,7 @@ function startPolling(orderId){
           }
         }
       })
-      .catch(err => console.log("Đang chờ đồng bộ...", err));
+      .catch(err => console.log("Đang chờ đồng bộ..."));
   }, 5000); // Tự động load API kiểm tra trạng thái mỗi 5 giây
 }
 
